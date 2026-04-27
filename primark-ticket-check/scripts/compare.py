@@ -115,12 +115,16 @@ def parse_ticket_request(text):
     return info
 
 
-def parse_sample_pdf(text):
-    """从工厂打样 PDF 提取条码/SKU/价格等"""
+def parse_sample_pdf(text, kimball_5=None):
+    """从工厂打样 PDF 提取条码/SKU/价格等
+
+    kimball_5: 从 Ticket 读出的 5 位 Kimball 基础号,用来动态构造
+               Kimball-7 正则(避免硬编码前缀造成新款式误报)。
+    """
     info = {
         'barcodes': [],   # 所有出现的 EAN-13
         'skus': [],       # 所有出现的 SKU (212xxxxxx)
-        'kimballs': [],   # Kimball-7 (3876xxx)
+        'kimballs': [],   # Kimball-7 (3876xxx / 1636xxx / 动态 kimball_5+xx)
         'styles': [],     # ORIN (9 位)
         'suppliers': [],  # 供应商号
         'prices': [],     # 价格字符串
@@ -143,11 +147,18 @@ def parse_sample_pdf(text):
     for m in re.finditer(r'(212\d{6})', text_compact):
         info['skus'].append(m.group(1))
 
-    # Kimball-7 (3876 开头, 7 位) 或 16364xx
+    # Kimball-7: 优先用 Ticket 里读出的 5 位基础号动态构造正则
+    # (避免硬编码前缀造成新款型误报,例如 28130xx / 25612xx 等)
+    if kimball_5 and re.fullmatch(r'\d{5}', kimball_5):
+        for m in re.finditer(r'(' + re.escape(kimball_5) + r'\d{2})', text_compact):
+            info['kimballs'].append(m.group(1))
+    # 历史硬编码前缀作为兜底(保证老文档不回归)
     for m in re.finditer(r'(3876\d{3})', text_compact):
-        info['kimballs'].append(m.group(1))
+        if m.group(1) not in info['kimballs']:
+            info['kimballs'].append(m.group(1))
     for m in re.finditer(r'(1636\d{3})', text_compact):
-        info['kimballs'].append(m.group(1))
+        if m.group(1) not in info['kimballs']:
+            info['kimballs'].append(m.group(1))
 
     # 9 位 STYLE (在原文中)
     for m in re.finditer(r'\b(99\d{7})\b', text):
@@ -344,7 +355,7 @@ def main():
     sample_text = extract_pdf_text(sample_path)
 
     ticket_info = parse_ticket_request(ticket_text)
-    sample_info = parse_sample_pdf(sample_text)
+    sample_info = parse_sample_pdf(sample_text, kimball_5=ticket_info.get('kimball'))
 
     result = compare(ticket_info, sample_info)
     result['header'] = {
