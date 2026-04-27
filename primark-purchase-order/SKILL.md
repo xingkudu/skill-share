@@ -13,9 +13,9 @@ description: 根据 Primark 客户的 Ticket Request PDF 和 Purchase Order (PO)
 
 | 类型 | 路径 |
 |---|---|
-| **采购单 .xls** | `/Users/mmc/.openclaw/workspace/agents/textile-trade/projects/Primark/<款号>/<日期>/<款号> 价格小圆贴&条码贴 采购单-YYYY.M.D.xls` |
-| **条码贴比对结果 JSON** | `/Users/mmc/.openclaw/workspace/agents/textile-trade/projects/Primark/<款号>/比对结果-条码贴-YYYYMMDD-HHMM.json` |
-| **洗标比对结果 JSON** | `/Users/mmc/.openclaw/workspace/agents/textile-trade/projects/Primark/<型号>/比对结果-洗标-YYYYMMDD-HHMM.json` |
+| **采购单 .xls** | `~/.openclaw/workspace/agents/textile-trade/projects/Primark/<款号>/<日期>/<款号> 价格小圆贴&条码贴 采购单-YYYY.M.D.xls` |
+| **条码贴比对结果 JSON** | `~/.openclaw/workspace/agents/textile-trade/projects/Primark/<款号>/比对结果-条码贴-YYYYMMDD-HHMM.json` |
+| **洗标比对结果 JSON** | `~/.openclaw/workspace/agents/textile-trade/projects/Primark/<型号>/比对结果-洗标-YYYYMMDD-HHMM.json` |
 | **Markdown 报告** | 同目录下，文件名前缀 `比对报告-` 或 `采购单生成报告-` |
 
 ### 在最终回复里的强制输出格式
@@ -24,11 +24,15 @@ description: 根据 Primark 客户的 Ticket Request PDF 和 Purchase Order (PO)
 ✅ 完成
 
 📍 文件路径
-- 采购单: /Users/mmc/.openclaw/workspace/agents/textile-trade/projects/Primark/991184191/20260427/...
-- 报告: /Users/mmc/.openclaw/workspace/agents/textile-trade/projects/Primark/991184191/20260427/...
+- 采购单: ~/.openclaw/workspace/agents/textile-trade/projects/Primark/991184191/20260427/...
+- 报告: ~/.openclaw/workspace/agents/textile-trade/projects/Primark/991184191/20260427/...
 ```
 
-**禁止**只说"已生成在 workspace 下"或"在 projects 目录里"——必须给出**完整可复制的绝对路径**。
+**禁止**只说"已生成在 workspace 下"或"在 projects 目录里"——必须给出**完整可复制的路径**。
+
+> 💡 **路径写法**：在文档/报告里展示路径时统一用 `~/` 形式（去用户名，便于跨机器复用）。
+> 脚本内部解析与文件 IO 仍用绝对路径（`pathlib.Path.home()` 自动展开）。
+> 报告元信息里的"绝对路径"字段，模型应将 `$HOME` 前缀替换为 `~` 后再输出。
 
 ---
 
@@ -81,6 +85,8 @@ python3 <SKILL_DIR>/scripts/generate.py <Ticket.PDF> <PO.PDF> -o <输出目录>
 > ⚠️ **手工实现时必须参照此模版,保证表头、列顺序、说明文字、备注与历史采购单一致。**
 
 **模版文件**:`reference/采购单-模版.xls`(原型:26RS4AK007 价格小圆贴&条码贴 采购单-2026.4.23.xls,已被用户认可为标准格式)
+
+> 🔒 **模版已脱敏**:所有款号/SKU/EAN-13/Kimball/供应商号/部门号/颜色/价格/数量等真实字段均替换为 `<占位符>`(例如 `<Style ORIN>`、`<SKU-1>`、`<EAN13-1>`、`<GCC 价组:KWD/AED/QAR/BHD>`),数量一律为 0。样品参考图(条码贴/价格小圆贴/BABY小圆贴)不再嵌入模版内,以独立 PNG 形式保留在同目录(`reference/*.png`),由 `generate.py` 按需插入新生成的采购单。含真实数据的原版备份为 `采购单-模版.xls.bak-realdata-20260427`(私有,勿外发)。
 
 ### 模版结构速查
 

@@ -13,9 +13,9 @@ description: 比对 Primark 条码贴/价签 PDF 与原始 Ticket Request PDF，
 
 | 类型 | 路径 |
 |---|---|
-| **采购单 .xls** | `/Users/mmc/.openclaw/workspace/agents/textile-trade/projects/Primark/<款号>/<日期>/<款号> 价格小圆贴&条码贴 采购单-YYYY.M.D.xls` |
-| **条码贴比对结果 JSON** | `/Users/mmc/.openclaw/workspace/agents/textile-trade/projects/Primark/<款号>/比对结果-条码贴-YYYYMMDD-HHMM.json` |
-| **洗标比对结果 JSON** | `/Users/mmc/.openclaw/workspace/agents/textile-trade/projects/Primark/<型号>/比对结果-洗标-YYYYMMDD-HHMM.json` |
+| **采购单 .xls** | `~/.openclaw/workspace/agents/textile-trade/projects/Primark/<款号>/<日期>/<款号> 价格小圆贴&条码贴 采购单-YYYY.M.D.xls` |
+| **条码贴比对结果 JSON** | `~/.openclaw/workspace/agents/textile-trade/projects/Primark/<款号>/比对结果-条码贴-YYYYMMDD-HHMM.json` |
+| **洗标比对结果 JSON** | `~/.openclaw/workspace/agents/textile-trade/projects/Primark/<型号>/比对结果-洗标-YYYYMMDD-HHMM.json` |
 | **Markdown 报告** | 同目录下，文件名前缀 `比对报告-` 或 `采购单生成报告-` |
 
 ### 在最终回复里的强制输出格式
@@ -24,11 +24,15 @@ description: 比对 Primark 条码贴/价签 PDF 与原始 Ticket Request PDF，
 ✅ 完成
 
 📍 文件路径
-- 采购单: /Users/mmc/.openclaw/workspace/agents/textile-trade/projects/Primark/991184191/20260427/...
-- 报告: /Users/mmc/.openclaw/workspace/agents/textile-trade/projects/Primark/991184191/20260427/...
+- 采购单: ~/.openclaw/workspace/agents/textile-trade/projects/Primark/991184191/20260427/...
+- 报告: ~/.openclaw/workspace/agents/textile-trade/projects/Primark/991184191/20260427/...
 ```
 
-**禁止**只说"已生成在 workspace 下"或"在 projects 目录里"——必须给出**完整可复制的绝对路径**。
+**禁止**只说"已生成在 workspace 下"或"在 projects 目录里"——必须给出**完整可复制的路径**。
+
+> 💡 **路径写法**：在文档/报告里展示路径时统一用 `~/` 形式（去用户名，便于跨机器复用）。
+> 脚本内部解析与文件 IO 仍用绝对路径（`pathlib.Path.home()` 自动展开）。
+> 报告元信息里的"绝对路径"字段，模型应将 `$HOME` 前缀替换为 `~` 后再输出。
 
 ---
 
@@ -83,7 +87,7 @@ cat <项目目录>/比对结果-条码贴-<ORIN>-<YYYYMMDD-HHMM>.json
 
 ## 适用场景
 
-- 客户:**Primark**
+- 客户:**Primark**(爱尔兰快时尚集团)
 - 输入:
   - **基准文件** = `Ticket_Request_<PO号>_<n>.PDF`(Primark 系统导出的票据请求,权威基准)
   - **待检文件** = 工厂/制版方做的条码贴/价签 PDF(通常文件名形如 `YY.M.D-<款号>条码贴.pdf`)

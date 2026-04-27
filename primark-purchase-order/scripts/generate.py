@@ -20,6 +20,27 @@ except ImportError as e:
     print(f"❌ 缺少依赖: {e}\n请运行: pip3 install pypdf xlwt")
     sys.exit(1)
 
+
+def _resolve_workspace_root():
+    """推断 textile-trade workspace 根路径（升序优先级）：
+      1. 环境变量 TEXTILE_TRADE_WORKSPACE
+      2. 环境变量 OPENCLAW_WORKSPACE/agents/textile-trade
+      3. 默认 ~/.openclaw/workspace/agents/textile-trade
+    均不存在返回 None。
+    """
+    candidates = []
+    env_tt = os.environ.get('TEXTILE_TRADE_WORKSPACE')
+    if env_tt:
+        candidates.append(pathlib.Path(env_tt).expanduser())
+    env_oc = os.environ.get('OPENCLAW_WORKSPACE')
+    if env_oc:
+        candidates.append(pathlib.Path(env_oc).expanduser() / 'agents' / 'textile-trade')
+    candidates.append(pathlib.Path.home() / '.openclaw' / 'workspace' / 'agents' / 'textile-trade')
+    for c in candidates:
+        if c.exists() and c.is_dir():
+            return c.resolve()
+    return None
+
 # ==================== 固定常量 (严禁 LLM 修改) ====================
 HEADERS = ['国家', '颜色', '英文颜色', '序列号', '部门号', 'SKU',
            'STYLE', '条码号', 'Supplier ID', '尺码', '价格', '数量']
@@ -268,9 +289,9 @@ def main():
     if args.output:
         out_dir = pathlib.Path(args.output).resolve()
     else:
-        # 推断 workspace 根: 从脚本路径向上找 textile-trade
-        workspace_root = pathlib.Path('/Users/mmc/.openclaw/workspace/agents/textile-trade')
-        if not workspace_root.exists():
+        # 推断 workspace 根: 优先环境变量 → 默认 ~/.openclaw/workspace/agents/textile-trade
+        workspace_root = _resolve_workspace_root()
+        if workspace_root is None:
             workspace_root = ticket_path.parent
         # 款号临时占位 (后面会被真实款号覆盖)
         out_dir = ticket_path.parent  # 先用临时目录
@@ -298,8 +319,8 @@ def main():
     now = datetime.datetime.now().astimezone()
     # 如果未指定 --output, 落到 projects/Primark/<款号>/<日期>/
     if not args.output:
-        workspace_root = pathlib.Path('/Users/mmc/.openclaw/workspace/agents/textile-trade')
-        if workspace_root.exists():
+        workspace_root = _resolve_workspace_root()
+        if workspace_root is not None:
             date_str = f"{now.year}{now.month:02d}{now.day:02d}"
             out_dir = workspace_root / 'projects' / 'Primark' / info['style_orin'] / date_str
             out_dir.mkdir(parents=True, exist_ok=True)

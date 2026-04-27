@@ -16,13 +16,34 @@ Primark 条码贴/价签 vs Ticket Request 比对脚本
 
 LLM 拿 JSON 渲染成 markdown 报告即可,不要重新写比对逻辑。
 """
-import sys, re, json, argparse, pathlib
+import sys, os, re, json, argparse, pathlib
 
 try:
     import pypdf
 except ImportError:
     print("❌ 缺少 pypdf,请: pip3 install pypdf", file=sys.stderr)
     sys.exit(1)
+
+
+def _resolve_workspace_root():
+    """推断 textile-trade workspace 根路径（升序优先级）：
+      1. 环境变量 TEXTILE_TRADE_WORKSPACE
+      2. 环境变量 OPENCLAW_WORKSPACE/agents/textile-trade
+      3. 默认 ~/.openclaw/workspace/agents/textile-trade
+    均不存在返回 None。
+    """
+    candidates = []
+    env_tt = os.environ.get('TEXTILE_TRADE_WORKSPACE')
+    if env_tt:
+        candidates.append(pathlib.Path(env_tt).expanduser())
+    env_oc = os.environ.get('OPENCLAW_WORKSPACE')
+    if env_oc:
+        candidates.append(pathlib.Path(env_oc).expanduser() / 'agents' / 'textile-trade')
+    candidates.append(pathlib.Path.home() / '.openclaw' / 'workspace' / 'agents' / 'textile-trade')
+    for c in candidates:
+        if c.exists() and c.is_dir():
+            return c.resolve()
+    return None
 
 
 # ==================== 提取逻辑 ====================
@@ -345,11 +366,11 @@ def main():
         out_path = pathlib.Path(args.output).resolve()
     else:
         import datetime
-        workspace_root = pathlib.Path('/Users/mmc/.openclaw/workspace/agents/textile-trade')
+        workspace_root = _resolve_workspace_root()
         now = datetime.datetime.now().astimezone()
         date_str = f"{now.year}{now.month:02d}{now.day:02d}-{now.hour:02d}{now.minute:02d}"
         style = ticket_info.get('style_orin') or ticket_info.get('po') or 'unknown'
-        if workspace_root.exists():
+        if workspace_root is not None:
             out_dir = workspace_root / 'projects' / 'Primark' / style
             out_dir.mkdir(parents=True, exist_ok=True)
             out_path = out_dir / f"比对结果-条码贴-{date_str}.json"
