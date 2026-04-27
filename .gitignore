@@ -1,0 +1,90 @@
+# ───────── macOS ─────────
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+
+# ───────── Windows ─────────
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ───────── Linux ─────────
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# ───────── 编辑器 / IDE ─────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+.history/
+.claude/
+.cursor/
+
+# ───────── Python（skill 里有 Python 代码示例，防止本地跑产生脏数据） ─────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+.env
+.env.local
+
+# ───────── Node（可选） ─────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ───────── OpenClaw 运行时 / 临时 ─────────
+.openclaw/
+.claw/
+*.log
+*.tmp
+*.bak
+*.orig
+
+# ───────── 客户真实订单数据（绝对不能提交！） ─────────
+# 任何 projects/ 目录：skill 自动落盘的真实 PO / Ticket / 洗标采购单
+projects/
+# 常见客户敏感文件名（保险起见再加一道过滤）
+*Ticket_Request*.pdf
+*Ticket_Request*.PDF
+*SUPPLIER*COPY*.pdf
+*SUPPLIER*COPY*.PDF
+*价格小圆贴*.xls
+*价格小圆贴*.xlsx
+*条码贴*采购单*.xls
+*条码贴*采购单*.xlsx
+*洗标采购单*.xls
+*洗标采购单*.xlsx
+*洗标*.pdf
+!**/templates/洗标-模版.pdf
+# 工厂打样回来的 PDF（通常文件名形如 YY.M.D-款号...）
+[0-9][0-9].[0-9]*-*.pdf
+[0-9][0-9].[0-9]*-*.PDF
+
+# ───────── 反核/比对报告（可能含客户数据） ─────────
+比对报告-*.md
+采购单生成报告-*.md
+
+# ───────── 自用笔记（避免误提交） ─────────
+NOTES.local.md
+TODO.local.md
+scratch/
+.scratch/

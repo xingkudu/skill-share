@@ -1,0 +1,32 @@
+# 文本文件统一用 LF，避免 Windows 检出变 CRLF 导致 bash 脚本和 python 行尾出问题
+* text=auto eol=lf
+
+# Shell / Python 强制 LF
+*.sh    text eol=lf
+*.py    text eol=lf
+
+# PowerShell 建议 CRLF（Windows 原生偏好）
+*.ps1   text eol=crlf
+
+# Markdown / YAML / JSON 跨平台 LF
+*.md    text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.json  text eol=lf
+
+# 二进制文件不要被 git 当文本处理（避免 Windows 下 checkout 损坏）
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.pdf   binary
+*.xls   binary
+*.xlsx  binary
+*.zip   binary
+
+# Zip/tar 导出时忽略的元信息（GitHub "Download ZIP" 不会包含）
+.gitattributes export-ignore
+.gitignore     export-ignore
+.github        export-ignore
+scripts        export-ignore
+PUBLISH.md     export-ignore
